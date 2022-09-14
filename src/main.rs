@@ -1,46 +1,34 @@
-// struct CustomSmartPointer {
-//     data: String,
-// }
-
-// impl Drop for CustomSmartPointer {
-//     fn drop(&mut self) {
-//         println!("Dropping CustomSmartPointer with data `{}`!", self.data);
-//     }
-// }
-
-// fn main() {
-//     // let c = CustomSmartPointer { data: String::from("my stuff") };
-//     // let d = CustomSmartPointer { data: String::from("other stuff") };
-//     // println!("CustomSmartPointers created.");
-//     let c = CustomSmartPointer { data: String::from("Some data") };
-//     println!("CustomSmartPointer created.");
-//     drop(c);
-//     println!("CustomSmartPointer dropped before the end of main.");
-// }
-
-
-enum List {
-    Cons(i32, Rc<List>),
-    Nil,
+pub trait Messenger {
+    fn send(&self, msg: &str);
 }
 
-use List::{Cons, Nil};
-use std::rc::Rc;
+pub struct LimitTracker<'a, T: 'a + Messenger> {
+    messenger: &'a T,
+    value: usize,
+    max: usize,
+}
 
-fn main() {
-    let a = Rc::new(Cons(5,
-        Rc::new(Cons(10,
-            Rc::new(Nil)))));
-    println!("Count after creating a = {}", Rc::strong_count(&a));
-    
-    let b = Cons(3, Rc::clone(&a));
-    println!("Count after creating b = {}", Rc::strong_count(&a));
-    let c = Cons(6, Rc::clone(&a));
-    println!("Count after creating c = {}", Rc::strong_count(&a));
-    {
-        let d = Cons(4, Rc::clone(&a));
-        println!("Count after creating d = {}", Rc::strong_count(&a));
+impl<'a, T> LimitTracker<'a, T>
+    where T: Messenger {
+        pub fn new(messenger: &T, max: usize) -> LimitTracker<T> {
+            LimitTracker {
+                messenger,
+                value: 0,
+                max,
+            }
+        }
     }
     
-    println!("Count after c goes out of scope = {}", Rc::strong_count(&a));
-}
+    pub fn set_value(&mut self, value: usize) {
+        self.value = value;
+
+        let percentage_of_max = self.value as f64 / self.max as f64;
+
+        if percentage_of_max >= 0.75 && percentage_of_max < 0.9 {
+            self.messenger.send("Warning: You've used up over 75% of your quota!");
+        } else if percentage_of_max >= 0.9 && percentage_of_max < 1.0 {
+            self.messenger.send("Urgent warning: You've used up over 90% of your quota!");
+        } else if percentage_of_max >= 1.0 {
+            self.messenger.send("Error: You are over your quota!");
+        }
+    }
