@@ -1,36 +1,16 @@
-use std::rc::{Rc, Weak};
-use std::cell::RefCell;
-
-#[derive(Debug)]
-struct Node {
-    value: i32,
-    parent: RefCell<Weak<Node>>,
-    children: RefCell<Vec<Rc<Node>>>,
-}
+use std::thread;
+use std::time::Duration;
 
 fn main() {
-    let leaf = Rc::new(Node {
-        value: 3,
-        parent: RefCell::new(Weak::new()),
-        children: RefCell::new(vec![]),
+    thread::spawn(|| {
+        for i in 1..10 {
+            println!("Hi number {} from the spawned thread", i);
+            thread::sleep(Duration::from_millis(1));
+        }
     });
 
-    println!("leaf strong = {}, weak = {}", Rc::strong_count(&leaf), Rc::weak_count(&leaf),);
-
-    {
-        let branch = Rc::new(Node {
-            value: 5,
-            parent: RefCell::new(Weak::new()),
-            children: RefCell::new(vec![Rc::clone(&leaf)]),
-        });
-    
-        *leaf.parent.borrow_mut() = Rc::downgrade(&branch);
-    
-        println!("branch strong = {}, weak = {}", Rc::strong_count(&branch), Rc::weak_count(&branch),);
-    
-        println!("leaf strong = {}, weak = {}", Rc::strong_count(&leaf), Rc::weak_count(&leaf),);
+    for i in 1..5 {
+        println!("Hi number {} from the main thread!", i);
+        thread::sleep(Duration::from_millis(1));
     }
-    
-    println!("leaf parent = {:?}", leaf.parent.borrow().upgrade());
-    println!("leaf strong = {}, weak = {}", Rc::strong_count(&leaf), Rc::weak_count(&leaf),);
 }
