@@ -6,7 +6,8 @@ fn main() {
 
     thread::spawn(move || {
         let val = String::from("Data");
-        tx.send(val).unwrap()
+        tx.send(val).unwrap();
+        println!("val is {}", val);
     });
 
     let received = rx.recv().unwrap();
