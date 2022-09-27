@@ -1,8 +1,9 @@
-use std::slice;
+extern "C" {
+    fn abs(input: i32) -> i32;
+}
 
-let address = 0x012345usize;
-let r = address as *mut i32;
-
-let slice = unsafe {
-    slice::from_raw_parts_mut(r, 10000)
+fn main() {
+    unsafe {
+        println!("Absolute value of -3 according to C: {}", abs(-3));
+    }
 }
