@@ -1,12 +1,8 @@
 use std::slice;
 
-fn split_at_mut(slice: &mut [i32], mid: usize) -> (&mut [i32], &mut [i32]) {
-    let len = slice.len();
-    let ptr = slice.as_mut_ptr();
+let address = 0x012345usize;
+let r = address as *mut i32;
 
-    assert!(mid <= len);
-
-    unsafe {
-        (slice::from_raw_parts_mut(ptr, mid), slice::from_raw_parts_mut(ptr.offset(mid as isize), len - mid))
-    }
+let slice = unsafe {
+    slice::from_raw_parts_mut(r, 10000)
 }
